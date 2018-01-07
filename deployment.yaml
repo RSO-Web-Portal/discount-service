@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: discount-service
+  labels:
+    qwe: discount-service
+spec:
+  type: NodePort
+  ports:
+  - port: 8086
+    targetPort: 8086
+    protocol: TCP
+    name: http
+  selector:
+    qwe: discount-service
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: discount-service
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        qwe: discount-service
+    spec:
+      containers:
+      - image: rsodocker123/discount-service
+        imagePullPolicy: Always
+        name: discount-service
+        env:
+          - name: KUMULUZEE_DISCOVERY_CLUSTER
+            value: etcd-cluster
+          - name: KUMULUZEE_DISCOVERY_ETCD_HOSTS
+            value: http://etcd:2379
+        ports:
+        - containerPort: 443
+        - containerPort: 8086
+        resources: {}
+        securityContext:
+          privileged: false
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      restartPolicy: Always
